@@ -2,3 +2,11 @@
 name = "bf"
 version = "0.1.0"
 authors = ["David Barnett <david@barnett.net.nz>"]
+
+[[bin]]
+name = "bfi"
+path = "src/main.rs"
+
+[lib]
+name = "bf"
+path = "src/lib.rs"
