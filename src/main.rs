@@ -40,21 +40,23 @@ fn run(program: &Vec<BFSymbol>, inital: Option<Vec<u8>>) {
         None => vec![0,0,0,0,0,0,0,0],
     };
 
-    let mut i = 0;
+    let mut iter = 0;
+    let mut cell = *data.get_mut(iter).unwrap();
     for sym in program {
         match *sym {
-            BFSymbol::Add => data[i] += 1,
-            BFSymbol::Sub => data[i] -= 1,
-            BFSymbol::Next => i = (i + 1) % data.len(),
-            BFSymbol::Prev => {
-                i -= 1;
-                if i < 0 {
-                    i = data.len() - 1;
-                }
+            BFSymbol::Add => cell += 1,
+            BFSymbol::Sub => cell -= 1,
+            BFSymbol::Next => cell = match data.get_mut(iter + 1) {
+                Some(n) => {iter += 1; *n},
+                None => cell,
+            },
+            BFSymbol::Prev => cell = match data.get_mut(iter - 1) {
+                Some(n) => {iter -= 1; *n},
+                None => cell,
             },
             BFSymbol::WhileStart => (),
             BFSymbol::WhileEnd => (),
-            BFSymbol::Print => print!("{}", data[i] as char),
+            BFSymbol::Print => print!("{}", cell as char),
             BFSymbol::Get => (),
         }
     }
@@ -62,4 +64,5 @@ fn run(program: &Vec<BFSymbol>, inital: Option<Vec<u8>>) {
 
 fn main() {
     run(&parse(".".to_string()), None);
+    run(&parse("+++.>.".to_string()), None);
 }
