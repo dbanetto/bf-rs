@@ -24,7 +24,7 @@ fn parse(code: String) -> Vec<BFSymbol> {
             ']' => BFSymbol::WhileEnd,
             '.' => BFSymbol::Print,
             ',' => BFSymbol::Get,
-            _ => (), // ignore every other character
+            _ => continue, // ignore every other character
         };
         println!("{} {:?}", c, symbol);
         program.push(symbol);
