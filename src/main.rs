@@ -44,8 +44,16 @@ fn run(program: &Vec<BFSymbol>, inital: Option<Vec<u8>>) {
     let mut cell = *data.get_mut(iter).unwrap();
     for sym in program {
         match *sym {
-            BFSymbol::Add => cell += 1,
-            BFSymbol::Sub => cell -= 1,
+            BFSymbol::Add => cell = if cell == std::u8::MAX {
+                std::u8::MIN
+            } else {
+                cell + 1
+            },
+            BFSymbol::Sub => cell = if cell == std::u8::MIN {
+                std::u8::MAX
+            } else {
+                cell - 1
+            },
             BFSymbol::Next => cell = match data.get_mut(iter + 1) {
                 Some(n) => {iter += 1; *n},
                 None => cell,
