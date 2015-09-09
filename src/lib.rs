@@ -39,8 +39,8 @@ pub fn run(program: &Vec<Symbol>, inital: Option<Vec<u8>>) {
         None => vec![0,0,0,0,0,0,0,0],
     };
 
-    let mut iter = 0;
-    let mut cell = *data.get_mut(iter).unwrap();
+    let mut iter = data.iter_mut();
+    let mut cell = *iter.next().unwrap();
     for sym in program {
         match *sym {
             Symbol::Add => cell = if cell == std::u8::MAX {
@@ -53,12 +53,12 @@ pub fn run(program: &Vec<Symbol>, inital: Option<Vec<u8>>) {
             } else {
                 cell - 1
             },
-            Symbol::Next => cell = match data.get_mut(iter + 1) {
-                Some(n) => {iter += 1; *n},
+            Symbol::Next => cell = match iter.next() {
+                Some(n) => *n,
                 None => cell,
             },
-            Symbol::Prev => cell = match data.get_mut(iter - 1) {
-                Some(n) => {iter -= 1; *n},
+            Symbol::Prev => cell = match iter.next_back() {
+                Some(n) => *n,
                 None => cell,
             },
             Symbol::WhileStart => (),
