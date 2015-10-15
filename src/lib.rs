@@ -1,11 +1,12 @@
-#[derive(Debug)]
+use std::str::Chars;
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Symbol {
     Add,
     Sub,
     Next,
     Prev,
-    WhileStart,
-    WhileEnd,
+    While(Vec<Symbol>),
     Print,
     Get,
 }
@@ -13,22 +14,44 @@ pub enum Symbol {
 pub fn parse(code: String) -> Vec<Symbol> {
 
     let mut program = Vec::new();
-    for c in code.chars() {
-        let symbol = match c {
+    let mut iter = code.chars();
+    while let Some(c) = iter.next() {
+        let symbol = match c as char {
             '+' => Symbol::Add,
             '-' => Symbol::Sub,
             '>' => Symbol::Next,
             '<' => Symbol::Prev,
-            '[' => Symbol::WhileStart,
-            ']' => Symbol::WhileEnd,
+            '[' => Symbol::While(parse_while(&mut iter)),
+            ']' => panic!("Invalid program"),
             '.' => Symbol::Print,
             ',' => Symbol::Get,
             _ => continue, // ignore every other character
         };
-        println!("{} {:?}", c, symbol);
         program.push(symbol);
     }
     println!("{:?}\n", program);
+    program
+}
+
+fn parse_while(iter: &mut Chars) -> Vec<Symbol> {
+
+    let mut program = Vec::new();
+    loop{
+        program.push(match iter.next() {
+            Some(c) => match c as char {
+                '+' => Symbol::Add,
+                '-' => Symbol::Sub,
+                '>' => Symbol::Next,
+                '<' => Symbol::Prev,
+                '[' => Symbol::While(parse_while(iter)),
+                ']' => break,
+                '.' => Symbol::Print,
+                ',' => Symbol::Get,
+                _ => continue, // ignore every other character
+            },
+            None => panic!("Incorrect placement of ]"),
+        });
+    }
     program
 }
 
@@ -61,8 +84,7 @@ pub fn run(program: &Vec<Symbol>, inital: Option<Vec<u8>>) {
                 Some(n) => *n,
                 None => cell,
             },
-            Symbol::WhileStart => (),
-            Symbol::WhileEnd => (),
+            Symbol::While(_) => (),
             Symbol::Print => print!("{}", cell as char),
             Symbol::Get => (),
         }
@@ -72,9 +94,41 @@ pub fn run(program: &Vec<Symbol>, inital: Option<Vec<u8>>) {
 #[cfg(test)]
 mod test {
     use super::*;
+    use super::Symbol::*;
+
+    // TODO: Update macros once prefixing function names in macros are implemented
+    macro_rules! parse_test {
+        ($name:ident, $code:expr, $exp:expr) => {
+            #[test]
+            fn $name() {
+                assert_eq!(parse($code.to_string()), $exp);
+            }
+        }
+    }
+
+    macro_rules! incorrect_parse_test {
+        ($name:ident, $code:expr) => {
+            #[test]
+            #[should_panic]
+            fn $name() {
+                parse($code.to_string());
+            }
+        }
+    }
 
     #[test]
     fn no_arthimatic_underflow() {
         run(&parse("-".to_string()), None);
     }
+
+    incorrect_parse_test!(parse_fail_while_first_brackets,"[");
+    incorrect_parse_test!(parse_fail_while_second_brackets,"[[]");
+
+    parse_test!(parse_simple_sub, "-", [Sub]);
+    parse_test!(parse_simple_add, "+", [Add]);
+    parse_test!(parse_simple_next, ">", [Next]);
+    parse_test!(parse_simple_prev, "<", [Prev]);
+    parse_test!(parse_simple_get, ",", [Get]);
+    parse_test!(parse_simple_print, ".", [Print]);
+    parse_test!(parse_simple_while, "[]", [While(vec![])]);
 }
