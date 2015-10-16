@@ -11,82 +11,101 @@ pub enum Symbol {
     Get,
 }
 
-pub fn parse(code: String) -> Vec<Symbol> {
-
-    let mut program = Vec::new();
-    let mut iter = code.chars();
-    while let Some(c) = iter.next() {
-        let symbol = match c as char {
-            '+' => Symbol::Add,
-            '-' => Symbol::Sub,
-            '>' => Symbol::Next,
-            '<' => Symbol::Prev,
-            '[' => Symbol::While(parse_while(&mut iter)),
-            ']' => panic!("Invalid program"),
-            '.' => Symbol::Print,
-            ',' => Symbol::Get,
-            _ => continue, // ignore every other character
-        };
-        program.push(symbol);
-    }
-    println!("{:?}\n", program);
-    program
+#[derive(Debug, PartialEq, Eq)]
+pub struct BFProgram {
+    code: Vec<Symbol>,
 }
 
-fn parse_while(iter: &mut Chars) -> Vec<Symbol> {
+pub type ParseResult<T> = Result<T, String>;
 
-    let mut program = Vec::new();
-    loop{
-        program.push(match iter.next() {
-            Some(c) => match c as char {
-                '+' => Symbol::Add,
-                '-' => Symbol::Sub,
-                '>' => Symbol::Next,
-                '<' => Symbol::Prev,
-                '[' => Symbol::While(parse_while(iter)),
-                ']' => break,
-                '.' => Symbol::Print,
-                ',' => Symbol::Get,
+use Symbol::*;
+impl BFProgram {
+
+    pub fn parse(code: String) -> ParseResult<Self> {
+
+        let mut program = Vec::new();
+        let mut iter = code.chars();
+        while let Some(c) = iter.next() {
+            let symbol = match c as char {
+                '+' => Add,
+                '-' => Sub,
+                '>' => Next,
+                '<' => Prev,
+                '[' => {
+                    match BFProgram::parse_while(&mut iter) {
+                        Ok(block) => While(block),
+                        Err(e) => return Err(e),
+                    }
+                },
+                ']' => panic!("Invalid program"),
+                '.' => Print,
+                ',' => Get,
                 _ => continue, // ignore every other character
-            },
-            None => panic!("Incorrect placement of ]"),
-        });
+            };
+            program.push(symbol);
+        }
+        println!("{:?}\n", program);
+
+        Ok(BFProgram {
+            code: program,
+        })
     }
-    program
-}
 
-pub fn run(program: &Vec<Symbol>, inital: Option<Vec<u8>>) {
+    fn parse_while(iter: &mut Chars) -> ParseResult<Vec<Symbol>> {
 
-    let mut data = match inital {
-        Some(init) => init.clone(),
-        None => vec![0,0,0,0,0,0,0,0],
-    };
+        let mut code = Vec::new();
+        loop {
+            code.push(match iter.next() {
+                Some(c) => match c as char {
+                    '+' => Symbol::Add,
+                    '-' => Symbol::Sub,
+                    '>' => Symbol::Next,
+                    '<' => Symbol::Prev,
+                    '[' => Symbol::While(BFProgram::parse_while(iter).unwrap()),
+                    ']' => break,
+                    '.' => Symbol::Print,
+                    ',' => Symbol::Get,
+                    _ => continue, // ignore every other character
+                },
+                None => return Err("Incorrect placement of ]".to_string()),
+            });
+        }
+        Ok(code)
+    }
 
-    let mut iter = data.iter_mut();
-    let mut cell = *iter.next().unwrap();
-    for sym in program {
-        match *sym {
-            Symbol::Add => cell = if cell == std::u8::MAX {
-                std::u8::MIN
-            } else {
-                cell + 1
-            },
-            Symbol::Sub => cell = if cell == std::u8::MIN {
-                std::u8::MAX
-            } else {
-                cell - 1
-            },
-            Symbol::Next => cell = match iter.next() {
-                Some(n) => *n,
-                None => cell,
-            },
-            Symbol::Prev => cell = match iter.next_back() {
-                Some(n) => *n,
-                None => cell,
-            },
-            Symbol::While(_) => (),
-            Symbol::Print => print!("{}", cell as char),
-            Symbol::Get => (),
+    pub fn run(&self, inital: Option<Vec<u8>>) {
+
+        let mut data = match inital {
+            Some(init) => init.clone(),
+            None => vec![0,0,0,0,0,0,0,0],
+        };
+
+        let mut iter = data.iter_mut();
+        let mut cell = *iter.next().unwrap();
+        for sym in &self.code {
+            match *sym {
+                Symbol::Add => cell = if cell == std::u8::MAX {
+                    std::u8::MIN
+                } else {
+                    cell + 1
+                },
+                Symbol::Sub => cell = if cell == std::u8::MIN {
+                    std::u8::MAX
+                } else {
+                    cell - 1
+                },
+                Symbol::Next => cell = match iter.next() {
+                    Some(n) => *n,
+                    None => cell,
+                },
+                Symbol::Prev => cell = match iter.next_back() {
+                    Some(n) => *n,
+                    None => cell,
+                },
+                Symbol::While(_) => (),
+                Symbol::Print => print!("{}", cell as char),
+                Symbol::Get => (),
+            }
         }
     }
 }
@@ -101,7 +120,7 @@ mod test {
         ($name:ident, $code:expr, $exp:expr) => {
             #[test]
             fn $name() {
-                assert_eq!(parse($code.to_string()), $exp);
+                assert_eq!(BFProgram::parse($code.to_string()).unwrap().code, $exp);
             }
         }
     }
@@ -111,14 +130,14 @@ mod test {
             #[test]
             #[should_panic]
             fn $name() {
-                parse($code.to_string());
+                BFProgram::parse($code.to_string()).unwrap();
             }
         }
     }
 
     #[test]
     fn no_arthimatic_underflow() {
-        run(&parse("-".to_string()), None);
+        BFProgram::parse("-".to_string()).unwrap().run(None);
     }
 
     incorrect_parse_test!(parse_fail_while_first_brackets,"[");

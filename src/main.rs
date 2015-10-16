@@ -5,14 +5,14 @@ use bf::*;
 
 #[cfg(not(test))]
 fn main() {
-    run(&parse(".".to_string()), None);
+    BFProgram::parse(".".to_string()).unwrap().run(None);
     print!("\n");
-    run(&parse("+.".to_string()), None);
+    BFProgram::parse("+.".to_string()).unwrap().run(None);
     print!("\n");
-    run(&parse("-".to_string()), None);
+    BFProgram::parse("-".to_string()).unwrap().run(None);
     print!("\n");
-    run(&parse("[-]".to_string()), None);
+    BFProgram::parse("[-]".to_string()).unwrap().run(None);
     print!("\n");
-    run(&parse("[][][][]".to_string()), None);
+    BFProgram::parse("[][][][]".to_string()).unwrap().run(None);
 }
 
