@@ -22,7 +22,7 @@ Implementation details for specified [undefined behaviour](http://www.muppetlabs
 
 * Wraps around the cell value with the range of 0 to 255
 
-* no more input data
+* When there is no more input data or an error in the input data, the cell will be set to 0
 
 ## TODO
 
@@ -31,7 +31,7 @@ Implementation details for specified [undefined behaviour](http://www.muppetlabs
 - [x] Tests
 - [ ] Portability tests using the [archive](http://esoteric.sange.fi/brainfuck/)
 - [ ] a CLI
-- [ ] Inputs
+- [x] Inputs
 
 ## License
 

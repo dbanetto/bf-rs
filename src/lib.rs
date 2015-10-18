@@ -1,4 +1,6 @@
 use std::str::Chars;
+use Symbol::*;
+use std::io::{Read, stdin};
 
 #[derive(Debug, PartialEq, Eq)]
 enum Symbol {
@@ -18,7 +20,6 @@ pub struct BFProgram {
 
 pub type ParseResult<T> = Result<T, String>;
 
-use Symbol::*;
 impl BFProgram {
 
     pub fn parse(code: String) -> ParseResult<Self> {
@@ -57,14 +58,14 @@ impl BFProgram {
         loop {
             code.push(match iter.next() {
                 Some(c) => match c as char {
-                    '+' => Symbol::Add,
-                    '-' => Symbol::Sub,
-                    '>' => Symbol::Next,
-                    '<' => Symbol::Prev,
-                    '[' => Symbol::While(BFProgram::parse_while(iter).unwrap()),
+                    '+' => Add,
+                    '-' => Sub,
+                    '>' => Next,
+                    '<' => Prev,
+                    '[' => While(BFProgram::parse_while(iter).unwrap()),
                     ']' => break,
-                    '.' => Symbol::Print,
-                    ',' => Symbol::Get,
+                    '.' => Print,
+                    ',' => Get,
                     _ => continue, // ignore every other character
                 },
                 None => return Err("Incorrect placement of ]".to_string()),
@@ -73,51 +74,89 @@ impl BFProgram {
         Ok(code)
     }
 
-    pub fn run(&self, inital: Option<Vec<u8>>) {
-        let mut buffer = [0; 256];
-        let mut i =  0;
-
-        Self::run_internal(&mut i, &mut buffer, &self.code);
+    /// run `BFProgram` with stdin as the input
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use bf::BFProgram;
+    ///
+    /// BFProgram::parse("-".to_string()).unwrap().run()
+    ///
+    /// ```
+    pub fn run(&self) {
+        self.run_with(stdin());
     }
 
-    fn run_internal(index: &mut usize, buffer: &mut [u8], code: &Vec<Symbol>) {
+    /// run `BFProgram` with anything that implments `Read` as an input
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::io;
+    /// use std::io::prelude::*;
+    /// use std::fs::File;
+    /// use bf::BFProgram;
+    /// # fn foo() -> io::Result<()> {
+    ///
+    /// let mut f = try!(File::open("foo.txt"));
+    /// BFProgram::parse("-".to_string()).unwrap().run_with(f);
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn run_with<R: Read>(&self, input: R) {
+        let mut buffer = [0; 256];
+        let mut i =  0;
+        let mut io = input;
+
+        Self::run_internal(&mut io, &mut i, &mut buffer, &self.code);
+    }
+
+    fn run_internal<R: Read>(input: &mut R, index: &mut usize, buffer: &mut [u8], code: &Vec<Symbol>) {
 
         // Would use iterator dor buffer if there was that did: &mut + peek() + DoubleEndedIterator
         for sym in code {
             match *sym {
-                Symbol::Add => {
+                Add => {
                     buffer[*index] = if buffer[*index] == std::u8::MAX {
                         std::u8::MIN
                     } else {
                         buffer[*index] + 1
                     };
                 },
-                Symbol::Sub => {
+                Sub => {
                     buffer[*index] = if buffer[*index] == std::u8::MIN {
                         std::u8::MAX
                     } else {
                         buffer[*index] - 1
                     };
                 },
-                Symbol::Next => {
+                Next => {
                     *index = if *index + 1 < buffer.len() {
                         *index + 1
                     } else {
                         0
                     }
                 },
-                Symbol::Prev => {
+                Prev => {
                     *index = if *index > 0 {
                         *index - 1
                     } else {
                         buffer.len() - 1
                     }
                 },
-                Symbol::While(ref while_code) => while buffer[*index] != 0 {
-                  Self::run_internal(index, buffer, while_code);
+                While(ref while_code) => while buffer[*index] != 0 {
+                    Self::run_internal(input, index, buffer, while_code);
                 },
-                Symbol::Print => print!("{}", buffer[*index] as char),
-                Symbol::Get => (),
+                Print => print!("{}", buffer[*index] as char),
+                Get => {
+                    let mut buf = [0; 1];
+                    buffer[*index] = match input.read(&mut buf) {
+                        Ok(_) => buf[0],
+                        Err(_) => 0
+                    };
+                },
             }
         }
     }
@@ -150,13 +189,12 @@ mod test {
 
     #[test]
     fn no_arthimatic_underflow() {
-        BFProgram::parse("-".to_string()).unwrap().run(None);
+        BFProgram::parse("-".to_string()).unwrap().run();
     }
 
     #[test]
     fn no_arthimatic_overflow() {
-        BFProgram::parse(".+".to_string()).unwrap()
-            .run(Some(vec![255]));
+        BFProgram::parse("-[>+<-]".to_string()).unwrap().run();
     }
 
     incorrect_parse_test!(parse_fail_while_first_brackets,"[");
