@@ -1,7 +1,7 @@
 use std::str::Chars;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum Symbol {
+enum Symbol {
     Add,
     Sub,
     Next,
@@ -106,7 +106,7 @@ impl BFProgram {
                         0
                     }
                 },
-                Symbol::Prev => { // Wrap around
+                Symbol::Prev => {
                     *index = if *index > 0 {
                         *index - 1
                     } else {
@@ -119,7 +119,6 @@ impl BFProgram {
                 Symbol::Print => print!("{}", buffer[*index] as char),
                 Symbol::Get => (),
             }
-            // println!("sym:={:?} buffer:={:?}", sym, cell);
         }
     }
 }
