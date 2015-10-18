@@ -8,3 +8,11 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+
+after_script:
+  - cargo doc
+  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
+
+env:
+  global:
+    - secure: lfbZtU10fnISHPXpyEYiXKs0HUdU/LpkCKYapObDgchL6q+9LqnCbGZbNojgJpLTGmL0od4w6ydbE6H/51S4TdHQkiKxs2csNdnQSKI9wlbKcKdJrQJsUYcEPXoVkn+JubIZAiLxhlivazT5Mk03lXF57XZq9BiAgfxKwbv9JLY93zhyHWvuwG0gCjBdo77kUOuVUpJiy3k+Akl7/c2XOXkM4LiJXCOf1U/xgwtuHdzofg0WsInJjxPTtiNa4202v6JKnBRRo2xbE0cmhrO33LcTHj8Ykwlk1g+re9owDT4kvvkcjTzE5nySwFQTueTPamqsucn5LHbRksLrOYVsn+hHHmnf8I5FnCXo2MJn+fTxu0ecxT3uNO3WkRsc2EOTaY4Hrcw9hBKBAmsYZnwpaqfA9sp2fGZRzlF5a7G8vo/mEFBPrhsNyP4aIFa3V9KPOM3FfmhbDC+AuKQq66lxgQqdyasRceNpuXXUVQuB0xDHX5GQyCAt8vvs+17ychDr0UoFTyo34cv3oXfXijqYcYTZ6cn6jj/Y7LyqH/ETzYX63GysZ/AdK9e2RxRQR+X6diDlEM9inI+yfGdZx5mxbh1eBHbvozZk+3vZdXZaVKIqnyKzO0/lTNmsNIyjeM4QWbubjQJSnxcs7yBlgh/TrsBraZZw4Wia4ToGXopz/Zw=
