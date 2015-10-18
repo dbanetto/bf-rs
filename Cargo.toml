@@ -1,11 +1,14 @@
 [package]
+authors = ["David Barnett <david@barnett.net.nz>"]
 name = "bf"
 version = "0.1.0"
-authors = ["David Barnett <david@barnett.net.nz>"]
 
 [[bin]]
 name = "bfi"
 path = "src/main.rs"
+
+[dependencies]
+clap = "1.4.5"
 
 [lib]
 name = "bf"
