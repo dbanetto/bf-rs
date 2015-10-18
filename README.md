@@ -1,5 +1,7 @@
 # bf-rs
 
+[![Build Status](https://travis-ci.org/zyphrus/bf-rs.svg)](https://travis-ci.org/zyphrus/bf-rs)
+
 A simple brainfuck interpreter in Rust.
 
 The goal is to implement the "language" as described at http://www.muppetlabs.com/~breadbox/bf/
