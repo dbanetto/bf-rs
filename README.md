@@ -4,7 +4,7 @@
 
 A simple brainfuck interpreter in Rust.
 
-The goal is to implement the "language" as described at http://www.muppetlabs.com/~breadbox/bf/
+The goal is to learn more rust and implement brainfuck as described at http://www.muppetlabs.com/~breadbox/bf/
 
 ## Build
 
@@ -14,13 +14,24 @@ run `cargo build`
 
 Not implemented yet.
 
+## Portability information
+
+Implementation details for specified [undefined behaviour](http://www.muppetlabs.com/~breadbox/bf/standards.html)
+
+* Wraps around for the buffer, forward and back, sized 256 elements
+
+* Wraps around the cell value with the range of 0 to 255
+
+* no more input data
+
 ## TODO
 
-- [ ] While loops
+- [x] While loops
 - [ ] Documentation
-- [ ] Tests
+- [x] Tests
+- [ ] Portability tests using the [archive](http://esoteric.sange.fi/brainfuck/)
 - [ ] a CLI
-- [ ] Input files
+- [ ] Inputs
 
 ## License
 

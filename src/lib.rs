@@ -37,7 +37,7 @@ impl BFProgram {
                         Err(e) => return Err(e),
                     }
                 },
-                ']' => panic!("Invalid program"),
+                ']' => return Err("Incorrect placement of ]".to_string()),
                 '.' => Print,
                 ',' => Get,
                 _ => continue, // ignore every other character
@@ -74,38 +74,52 @@ impl BFProgram {
     }
 
     pub fn run(&self, inital: Option<Vec<u8>>) {
+        let mut buffer = [0; 256];
+        let mut i =  0;
 
-        let mut data = match inital {
-            Some(init) => init.clone(),
-            None => vec![0,0,0,0,0,0,0,0],
-        };
+        Self::run_internal(&mut i, &mut buffer, &self.code);
+    }
 
-        let mut iter = data.iter_mut();
-        let mut cell = *iter.next().unwrap();
-        for sym in &self.code {
+    fn run_internal(index: &mut usize, buffer: &mut [u8], code: &Vec<Symbol>) {
+
+        // Would use iterator dor buffer if there was that did: &mut + peek() + DoubleEndedIterator
+        for sym in code {
             match *sym {
-                Symbol::Add => cell = if cell == std::u8::MAX {
-                    std::u8::MIN
-                } else {
-                    cell + 1
+                Symbol::Add => {
+                    buffer[*index] = if buffer[*index] == std::u8::MAX {
+                        std::u8::MIN
+                    } else {
+                        buffer[*index] + 1
+                    };
                 },
-                Symbol::Sub => cell = if cell == std::u8::MIN {
-                    std::u8::MAX
-                } else {
-                    cell - 1
+                Symbol::Sub => {
+                    buffer[*index] = if buffer[*index] == std::u8::MIN {
+                        std::u8::MAX
+                    } else {
+                        buffer[*index] - 1
+                    };
                 },
-                Symbol::Next => cell = match iter.next() {
-                    Some(n) => *n,
-                    None => cell,
+                Symbol::Next => {
+                    *index = if *index + 1 < buffer.len() {
+                        *index + 1
+                    } else {
+                        0
+                    }
                 },
-                Symbol::Prev => cell = match iter.next_back() {
-                    Some(n) => *n,
-                    None => cell,
+                Symbol::Prev => { // Wrap around
+                    *index = if *index > 0 {
+                        *index - 1
+                    } else {
+                        buffer.len() - 1
+                    }
                 },
-                Symbol::While(_) => (),
-                Symbol::Print => print!("{}", cell as char),
+                Symbol::While(ref while_code) => while buffer[*index] != 0 {
+                  Self::run_internal(index, buffer, while_code);
+                },
+                Symbol::Print => print!("{}", buffer[*index] as char),
                 Symbol::Get => (),
             }
+            // println!("sym:={:?} buffer:={:?}", sym, cell);
         }
     }
 }
@@ -138,6 +152,12 @@ mod test {
     #[test]
     fn no_arthimatic_underflow() {
         BFProgram::parse("-".to_string()).unwrap().run(None);
+    }
+
+    #[test]
+    fn no_arthimatic_overflow() {
+        BFProgram::parse(".+".to_string()).unwrap()
+            .run(Some(vec![255]));
     }
 
     incorrect_parse_test!(parse_fail_while_first_brackets,"[");
