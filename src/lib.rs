@@ -13,7 +13,7 @@ enum Symbol {
     Get,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct BFProgram {
     code: Vec<Symbol>,
 }
@@ -22,6 +22,9 @@ pub type ParseResult<T> = Result<T, String>;
 
 impl BFProgram {
 
+    ///
+    ///
+    ///
     pub fn parse(code: String) -> ParseResult<Self> {
 
         let mut program = Vec::new();
@@ -45,7 +48,6 @@ impl BFProgram {
             };
             program.push(symbol);
         }
-        println!("{:?}\n", program);
 
         Ok(BFProgram {
             code: program,
@@ -163,7 +165,7 @@ impl BFProgram {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use super::Symbol::*;
 
@@ -207,4 +209,9 @@ mod test {
     parse_test!(parse_simple_get, ",", [Get]);
     parse_test!(parse_simple_print, ".", [Print]);
     parse_test!(parse_simple_while, "[]", [While(vec![])]);
+    parse_test!(parse_simple_all, "+-.,><[]", [Add, Sub, Print, Get, Next, Prev, While(vec![])]);
+
+    parse_test!(parse_while_nested, "[[]]", [While(vec![While(vec![])])]);
+    parse_test!(parse_while_with_contents, "[+-]", [While(vec![Add, Sub])]);
+
 }
