@@ -6,7 +6,6 @@ use std::fs::File;
 use bf::*;
 use clap::{Arg, App};
 
-#[cfg(not(test))]
 fn main() {
     let matches = App::new("bfi")
         .version("0.1.0") // TODO: Get version from crate info
