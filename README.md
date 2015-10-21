@@ -8,11 +8,23 @@ The goal is to learn more rust and implement brainfuck as described at http://ww
 
 ## Build
 
-run `cargo build`
+run `cargo build --release`
 
 ## How to use
 
-Not implemented yet.
+After build go into `target/release` and run `bfi --help` for usage
+
+To run a simple program with output:
+
+> `./bfi ,.`
+
+To execute a file
+
+> `./bfi -f hello.b`
+
+To read input from a file
+
+> `./bfi -i hello.txt .`
 
 ## Portability information
 
@@ -30,7 +42,7 @@ Implementation details for specified [undefined behaviour](http://www.muppetlabs
 - [ ] Documentation
 - [x] Tests
 - [ ] Portability tests using the [archive](http://esoteric.sange.fi/brainfuck/)
-- [ ] a CLI
+- [x] a CLI
 - [x] Inputs
 
 ## License

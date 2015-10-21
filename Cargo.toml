@@ -12,4 +12,5 @@ clap = "1.4.5"
 
 [lib]
 name = "bf"
+test = false
 path = "src/lib.rs"
