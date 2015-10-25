@@ -49,8 +49,6 @@ fn main() {
         }
     };
 
-
-    // Hello world from wikipedia
     match BFProgram::parse(code) {
         Ok(prog) => {
             if let Some(read) = matches.value_of("INPUT") {
@@ -65,6 +63,6 @@ fn main() {
                 prog.run();
             }
         },
-        Err(e) => println!("{}", e),
+        Err(e) => println!("Error while parsing program: {}", e),
     };
 }
