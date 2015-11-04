@@ -40,7 +40,7 @@ impl BFProgram {
                         Ok(block) => While(block),
                         Err(e) => return Err(e),
                     }
-                },
+                }
                 ']' => return Err("Incorrect placement of ]".to_string()),
                 '.' => Print,
                 ',' => Get,
@@ -49,9 +49,7 @@ impl BFProgram {
             program.push(symbol);
         }
 
-        Ok(BFProgram {
-            code: program,
-        })
+        Ok(BFProgram { code: program })
     }
 
     fn parse_while(iter: &mut Chars) -> ParseResult<Vec<Symbol>> {
@@ -109,15 +107,19 @@ impl BFProgram {
     /// ```
     pub fn run_with<R: Read>(&self, input: R) {
         let mut buffer = [0; 256];
-        let mut i =  0;
+        let mut i = 0;
         let mut io = input;
 
         Self::run_internal(&mut io, &mut i, &mut buffer, &self.code);
     }
 
-    fn run_internal<R: Read>(input: &mut R, index: &mut usize, buffer: &mut [u8], code: &Vec<Symbol>) {
+    fn run_internal<R: Read>(input: &mut R,
+                             index: &mut usize,
+                             buffer: &mut [u8],
+                             code: &Vec<Symbol>) {
 
-        // Would use iterator dor buffer if there was that did: &mut + peek() + DoubleEndedIterator
+        // Would use iterator dor buffer if there was that did: &mut + peek() +
+        // DoubleEndedIterator
         for sym in code {
             match *sym {
                 Add => {
@@ -126,28 +128,28 @@ impl BFProgram {
                     } else {
                         buffer[*index] + 1
                     };
-                },
+                }
                 Sub => {
                     buffer[*index] = if buffer[*index] == std::u8::MIN {
                         std::u8::MAX
                     } else {
                         buffer[*index] - 1
                     };
-                },
+                }
                 Next => {
                     *index = if *index + 1 < buffer.len() {
                         *index + 1
                     } else {
                         0
                     }
-                },
+                }
                 Prev => {
                     *index = if *index > 0 {
                         *index - 1
                     } else {
                         buffer.len() - 1
                     }
-                },
+                }
                 While(ref while_code) => while buffer[*index] != 0 {
                     Self::run_internal(input, index, buffer, while_code);
                 },
@@ -156,9 +158,9 @@ impl BFProgram {
                     let mut buf = [0; 1];
                     buffer[*index] = match input.read(&mut buf) {
                         Ok(_) => buf[0],
-                        Err(_) => 0
+                        Err(_) => 0,
                     };
-                },
+                }
             }
         }
     }
