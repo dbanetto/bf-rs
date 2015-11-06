@@ -9,24 +9,22 @@ use clap::{Arg, App};
 
 fn main() {
     let matches = App::new("bfi")
-        .version("0.1.0") // TODO: Get version from crate info
-        .author("David Barentt <david@barnett.net.nz>") // TODO: Get author from crate info
-        .about("A rust implementation of brainfuck")
-        .arg(Arg::with_name("CODE")
-             .help("brainfuck code to execute")
-            )
-        .arg(Arg::with_name("FILE")
-             .short("f")
-             .help("brainfuck code to execute from file")
-             .takes_value(true))
-        .arg(Arg::with_name("INPUT")
-             .short("i")
-             .long("input")
-             .help("Read input from file instead of stdin")
-             .takes_value(true))
-        .get_matches();
+                      .version("0.1.0")
+                      .author("David Barentt <david@barnett.net.nz>")
+                      .about("A rust implementation of brainfuck")
+                      .arg(Arg::with_name("CODE").help("brainfuck code to execute"))
+                      .arg(Arg::with_name("FILE")
+                               .short("f")
+                               .help("brainfuck code to execute from file")
+                               .takes_value(true))
+                      .arg(Arg::with_name("INPUT")
+                               .short("i")
+                               .long("input")
+                               .help("Read input from file instead of stdin")
+                               .takes_value(true))
+                      .get_matches();
 
-    let code: String = if let Some(s)  = matches.value_of("CODE") {
+    let code: String = if let Some(s) = matches.value_of("CODE") {
         // Always take code from ARGS over FILE
         s.to_string()
     } else {
@@ -59,11 +57,11 @@ fn main() {
                         println!("Error while opening file `{}` {}", read, e);
                         return;
                     }
-                };
+                }
             } else {
                 prog.run();
             }
-        },
+        }
         Err(e) => println!("Error while parsing program: {}", e),
-    };
+    }
 }
