@@ -1,6 +1,6 @@
 use std::str::Chars;
 use Symbol::*;
-use std::io::{Read, stdin};
+use std::io::{Read, Write, stdout, stdin};
 
 #[derive(Debug, PartialEq, Eq)]
 enum Symbol {
@@ -87,7 +87,7 @@ impl BFProgram {
     ///
     /// ```
     pub fn run(&self) {
-        self.run_with(stdin());
+        self.run_with(&mut stdin(), &mut stdout());
     }
 
     /// run `BFProgram` with anything that implments `Read` as an input
@@ -101,21 +101,26 @@ impl BFProgram {
     /// use bf::BFProgram;
     /// # fn foo() -> io::Result<()> {
     ///
-    /// let mut f = try!(File::open("foo.txt"));
-    /// BFProgram::parse("-".to_string()).unwrap().run_with(f);
+    /// let mut f_in = try!(File::open("in.txt"));
+    /// let mut f_out = try!(File::open("out.txt"));
+    /// BFProgram::parse("-".to_string()).unwrap()
+    ///                                  .run_with(&mut f_in, &mut f_out);
     ///
     /// # Ok(())
     /// # }
     /// ```
-    pub fn run_with<R: Read>(&self, input: R) {
+    pub fn run_with<R: Read, W: Write>(&self, input: &mut R, out: &mut W) {
         let mut buffer = [0; 256];
         let mut i =  0;
-        let mut io = input;
 
-        Self::run_internal(&mut io, &mut i, &mut buffer, &self.code);
+        Self::run_internal(input, out, &mut i, &mut buffer, &self.code);
     }
 
-    fn run_internal<R: Read>(input: &mut R, index: &mut usize, buffer: &mut [u8], code: &Vec<Symbol>) {
+    fn run_internal<R: Read, W: Write>(input: &mut R,
+                                       output: &mut W,
+                                       index: &mut usize,
+                                       buffer: &mut [u8],
+                                       code: &Vec<Symbol>) {
 
         // Would use iterator dor buffer if there was that did: &mut + peek() + DoubleEndedIterator
         for sym in code {
@@ -149,9 +154,9 @@ impl BFProgram {
                     }
                 },
                 While(ref while_code) => while buffer[*index] != 0 {
-                    Self::run_internal(input, index, buffer, while_code);
+                    Self::run_internal(input, output, index, buffer, while_code);
                 },
-                Print => print!("{}", buffer[*index] as char),
+                Print => { write!(output, "{}", buffer[*index] as char).unwrap(); },
                 Get => {
                     let mut buf = [0; 1];
                     buffer[*index] = match input.read(&mut buf) {

@@ -2,6 +2,7 @@ extern crate bf;
 extern crate clap;
 
 use std::io::prelude::*;
+use std::io::stdout;
 use std::fs::File;
 use bf::*;
 use clap::{Arg, App};
@@ -53,7 +54,7 @@ fn main() {
         Ok(prog) => {
             if let Some(read) = matches.value_of("INPUT") {
                 match File::open(read) {
-                    Ok(r) => prog.run_with(r),
+                    Ok(mut r) => prog.run_with(&mut r, &mut stdout()),
                     Err(e) => {
                         println!("Error while opening file `{}` {}", read, e);
                         return;
