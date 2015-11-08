@@ -109,7 +109,7 @@ impl BFProgram {
     /// ```
     pub fn run_with<R: Read, W: Write>(&self, input: &mut R, out: &mut W) {
         let mut buffer = [0; 256];
-        let mut i =  0;
+        let mut i = 0;
 
         Self::run_internal(input, out, &mut i, &mut buffer, &self.code);
     }
@@ -155,7 +155,9 @@ impl BFProgram {
                 While(ref while_code) => while buffer[*index] != 0 {
                     Self::run_internal(input, output, index, buffer, while_code);
                 },
-                Print => { write!(output, "{}", buffer[*index] as char).unwrap(); },
+                Print => {
+                    write!(output, "{}", buffer[*index] as char).unwrap();
+                }
                 Get => {
                     let mut buf = [0; 1];
                     buffer[*index] = match input.read(&mut buf) {

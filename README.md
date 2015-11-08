@@ -41,7 +41,7 @@ Implementation details for specified [undefined behaviour](http://www.muppetlabs
 - [x] While loops
 - [ ] Documentation
 - [x] Tests
-- [ ] Portability tests using the [archive](http://esoteric.sange.fi/brainfuck/)
+- [x] Portability tests using the [archive](http://esoteric.sange.fi/brainfuck/)
 - [x] a CLI
 - [x] Inputs
 
