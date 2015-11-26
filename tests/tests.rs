@@ -6,22 +6,6 @@ use std::io::{stdin, Cursor};
 use std::io::prelude::*;
 use std::fs::File;
 
-macro_rules! code_test {
-    ($name:ident, $code:expr, $expect:expr) => {
-        #[test]
-        fn $name() {
-            let mut out = Vec::<u8>::new();
-
-            BFProgram::parse($code.to_string()).unwrap()
-                .run_with(&mut stdin(), &mut out);
-
-            assert_eq!(out, $expect);
-        }
-
-    }
-}
-
-
 macro_rules! test_from_file {
     ($name:ident, $file:expr, $expect:expr) => {
         #[test]
@@ -32,7 +16,7 @@ macro_rules! test_from_file {
             let mut file = File::open($file.to_string()).unwrap();
             let _ = file.read_to_string(&mut code).unwrap();
             
-            BFProgram::parse(code).unwrap()
+            BFProgram::parse(&code).unwrap()
                 .run_with(&mut stdin(), &mut out);
 
             assert_eq!(out, $expect);
@@ -51,7 +35,7 @@ macro_rules! test_from_file_with_input {
             let mut file = File::open($file.to_string()).unwrap();
             let _ = file.read_to_string(&mut code).unwrap();
             
-            BFProgram::parse(code).unwrap()
+            BFProgram::parse(&code).unwrap()
                 .run_with(&mut buff, &mut out);
 
             assert_eq!(out, $expect);

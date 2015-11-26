@@ -25,7 +25,7 @@ impl BFProgram {
     ///
     ///
     ///
-    pub fn parse(code: String) -> ParseResult<Self> {
+    pub fn parse(code: &str) -> ParseResult<Self> {
 
         let mut program = Vec::new();
         let mut iter = code.chars();
@@ -41,7 +41,7 @@ impl BFProgram {
                         Err(e) => return Err(e),
                     }
                 }
-                ']' => return Err("Incorrect placement of ]".to_string()),
+                ']' => return Err("Incorrect placement of ]".to_owned()),
                 '.' => Print,
                 ',' => Get,
                 _ => continue, // ignore every other character
@@ -68,7 +68,7 @@ impl BFProgram {
                     ',' => Get,
                     _ => continue, // ignore every other character
                 },
-                None => return Err("Incorrect placement of ]".to_string()),
+                None => return Err("Incorrect placement of ]".to_owned()),
             });
         }
         Ok(code)
@@ -81,7 +81,7 @@ impl BFProgram {
     /// ```
     /// use bf::BFProgram;
     ///
-    /// BFProgram::parse("-".to_string()).unwrap().run()
+    /// BFProgram::parse("-").unwrap().run()
     ///
     /// ```
     pub fn run(&self) {
@@ -101,7 +101,7 @@ impl BFProgram {
     ///
     /// let mut f_in = try!(File::open("in.txt"));
     /// let mut f_out = try!(File::open("out.txt"));
-    /// BFProgram::parse("-".to_string()).unwrap()
+    /// BFProgram::parse("-").unwrap()
     ///                                  .run_with(&mut f_in, &mut f_out);
     ///
     /// # Ok(())
@@ -180,7 +180,7 @@ mod tests {
         ($name:ident, $code:expr, $exp:expr) => {
             #[test]
             fn $name() {
-                assert_eq!(BFProgram::parse($code.to_string()).unwrap().code, $exp);
+                assert_eq!(BFProgram::parse($code).unwrap().code, $exp);
             }
         }
     }
@@ -190,19 +190,19 @@ mod tests {
             #[test]
             #[should_panic]
             fn $name() {
-                BFProgram::parse($code.to_string()).unwrap();
+                BFProgram::parse($code).unwrap();
             }
         }
     }
 
     #[test]
     fn no_arthimatic_underflow() {
-        BFProgram::parse("-".to_string()).unwrap().run();
+        BFProgram::parse("-").unwrap().run();
     }
 
     #[test]
     fn no_arthimatic_overflow() {
-        BFProgram::parse("-[>+<-]".to_string()).unwrap().run();
+        BFProgram::parse("-[>+<-]").unwrap().run();
     }
 
     incorrect_parse_test!(parse_fail_while_first_brackets,"[");

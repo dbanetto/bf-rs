@@ -48,7 +48,7 @@ fn main() {
         }
     };
 
-    match BFProgram::parse(code) {
+    match BFProgram::parse(&code) {
         Ok(prog) => {
             if let Some(read) = matches.value_of("INPUT") {
                 match File::open(read) {
